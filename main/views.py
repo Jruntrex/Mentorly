@@ -6,6 +6,7 @@ import logging
 import time as _time
 from collections import defaultdict
 from datetime import date, datetime, time, timedelta
+from types import SimpleNamespace
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 logger = logging.getLogger(__name__)
@@ -2984,7 +2985,17 @@ def timeline_schedule_view(request):
     current_time_minutes = now_aware.hour * 60 + now_aware.minute
     current_day = now_aware.weekday() + 1  # 1=Monday
 
+    schedule_templates = []
+    schedule_by_day = defaultdict(list)
     if group:
+        schedule_templates = (
+            ScheduleTemplate.objects.filter(group=group, is_active=True)
+            .select_related("subject", "teacher", "classroom")
+            .order_by("day_of_week", "lesson_number")
+        )
+        for tmpl in schedule_templates:
+            schedule_by_day[tmpl.day_of_week].append(tmpl)
+
         # Дні тижня для таймлайну
         today_date = now_aware.date()
         start_week = today_date - timedelta(days=today_date.weekday())
@@ -3000,40 +3011,82 @@ def timeline_schedule_view(request):
                 .order_by("start_time")
             )
 
-            for lesson_idx, lesson in enumerate(lessons_in_db, start=1):
-                start_min = lesson.start_time.hour * 60 + lesson.start_time.minute
-                end_min = lesson.end_time.hour * 60 + lesson.end_time.minute
-                duration = end_min - start_min
+            if lessons_in_db.exists():
+                for lesson_idx, lesson in enumerate(lessons_in_db, start=1):
+                    start_min = lesson.start_time.hour * 60 + lesson.start_time.minute
+                    end_min = lesson.end_time.hour * 60 + lesson.end_time.minute
+                    duration = end_min - start_min
 
-                status = "future"
-                progress = 0
+                    status = "future"
+                    progress = 0
 
-                if day_num < current_day:
-                    status = "past"
-                elif day_num == current_day:
-                    if current_time_minutes > end_min:
+                    if day_num < current_day:
                         status = "past"
-                    elif current_time_minutes >= start_min:
-                        status = "current"
-                        passed = current_time_minutes - start_min
-                        progress = int((passed / duration) * 100) if duration > 0 else 0
+                    elif day_num == current_day:
+                        if current_time_minutes > end_min:
+                            status = "past"
+                        elif current_time_minutes >= start_min:
+                            status = "current"
+                            passed = current_time_minutes - start_min
+                            progress = int((passed / duration) * 100) if duration > 0 else 0
 
-                # Псевдо-слот: формуємо з часів самого уроку
-                pseudo_slot = {
-                    "start_time": lesson.start_time,
-                    "end_time": lesson.end_time,
-                    "lesson_number": lesson_idx,
-                }
-
-                day_lessons.append(
-                    {
-                        "slot": pseudo_slot,
-                        "assignment": lesson,
-                        "status": status,
-                        "progress": min(max(progress, 0), 100),
-                        "duration": duration,
+                    pseudo_slot = {
+                        "start_time": lesson.start_time,
+                        "end_time": lesson.end_time,
+                        "lesson_number": lesson_idx,
                     }
-                )
+
+                    day_lessons.append(
+                        {
+                            "slot": pseudo_slot,
+                            "assignment": lesson,
+                            "status": status,
+                            "progress": min(max(progress, 0), 100),
+                            "duration": duration,
+                        }
+                    )
+            elif schedule_by_day.get(day_num):
+                for tmpl in schedule_by_day[day_num]:
+                    start_min = tmpl.start_time.hour * 60 + tmpl.start_time.minute
+                    end_min = start_min + tmpl.duration_minutes
+                    duration = tmpl.duration_minutes
+
+                    status = "future"
+                    progress = 0
+                    if day_num < current_day:
+                        status = "past"
+                    elif day_num == current_day:
+                        if current_time_minutes > end_min:
+                            status = "past"
+                        elif current_time_minutes >= start_min:
+                            status = "current"
+                            passed = current_time_minutes - start_min
+                            progress = int((passed / duration) * 100) if duration > 0 else 0
+
+                    pseudo_assignment = SimpleNamespace(
+                        subject=tmpl.subject,
+                        teacher=tmpl.teacher,
+                        classroom=tmpl.classroom,
+                        is_cancelled=False,
+                        homework=None,
+                        materials=None,
+                        cancellation_reason=None,
+                    )
+                    pseudo_slot = {
+                        "start_time": tmpl.start_time,
+                        "end_time": (datetime.combine(today_date, tmpl.start_time) + timedelta(minutes=duration)).time(),
+                        "lesson_number": tmpl.lesson_number,
+                    }
+
+                    day_lessons.append(
+                        {
+                            "slot": pseudo_slot,
+                            "assignment": pseudo_assignment,
+                            "status": status,
+                            "progress": min(max(progress, 0), 100),
+                            "duration": duration,
+                        }
+                    )
 
             days_data.append(
                 {
