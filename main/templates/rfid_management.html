@@ -231,60 +231,79 @@
             </div>
 
             <!-- Filters & Search -->
-            <div class="flex flex-col sm:flex-row gap-2">
-                <div class="flex p-1 bg-slate-50 rounded-xl border border-slate-200">
-                    <button onclick="setFilter('all')" id="filter-all" class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all bg-white shadow-sm text-violet-600 whitespace-nowrap">Всі</button>
-                    <button onclick="setFilter('none')" id="filter-none" class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all text-mutedText hover:text-mainText whitespace-nowrap">Без картки</button>
-                    <button onclick="setFilter('has')" id="filter-has" class="flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all text-mutedText hover:text-mainText whitespace-nowrap">З карткою</button>
+            <div class="flex flex-col md:flex-row gap-3">
+                <div class="flex p-1.5 bg-slate-100/50 rounded-2xl border border-slate-200/60 backdrop-blur-sm">
+                    <button onclick="setFilter('all')" id="filter-all" class="px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all bg-white shadow-sm text-violet-600 whitespace-nowrap">Всі</button>
+                    <button onclick="setFilter('none')" id="filter-none" class="px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:text-slate-700 whitespace-nowrap">Без карти</button>
+                    <button onclick="setFilter('has')" id="filter-has" class="px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:text-slate-700 whitespace-nowrap">З картою</button>
                 </div>
-                <div class="relative flex-1">
-                    <input id="student-search" type="text" placeholder="Пошук..."
+                <div class="relative flex-1 group">
+                    <input id="student-search" type="text" placeholder="Пошук за ім'ям або групою..."
                         oninput="filterStudents()"
-                        class="w-full px-4 py-2 pr-9 rounded-xl border border-border bg-white text-sm font-medium text-mainText placeholder-mutedText focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition-all">
-                    <svg class="absolute right-3 top-2.5 w-4 h-4 text-mutedText pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                        class="w-full px-5 py-2.5 pr-11 rounded-2xl border-2 border-slate-100 bg-slate-50/50 text-sm font-bold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-violet-500/10 focus:border-violet-400 focus:bg-white transition-all duration-300">
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-violet-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
             <!-- Student list -->
-            <div id="student-list" class="flex-1 flex flex-col gap-1 max-h-[380px] lg:max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
+            <div id="student-list" class="flex-1 flex flex-col gap-2.5 max-h-[420px] lg:max-h-[580px] overflow-y-auto pr-1.5 custom-scrollbar">
                 {% for student in students %}
-                <div class="student-row group flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-border bg-white hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-150 cursor-pointer relative overflow-hidden"
+                <div class="student-row group flex items-center justify-between gap-4 px-4 py-3.5 rounded-2xl border border-slate-100 bg-white hover:border-violet-200 hover:bg-slate-50/50 hover:shadow-sm transition-all duration-200 cursor-pointer relative overflow-hidden"
                      data-name="{{ student.full_name|lower }}"
                      data-group="{{ student.group.name|lower|default:'' }}"
                      data-id="{{ student.pk }}"
                      data-uid="{{ student.rfid_uid|default:'' }}"
                      onclick="selectStudent(this)">
-                    <div class="flex items-center gap-3 min-w-0 z-10">
-                        <div class="w-8 h-8 rounded-xl bg-violet-100 text-violet-600 group-hover:bg-violet-500 group-hover:text-white flex items-center justify-center font-black text-xs transition-all flex-shrink-0">
+                    
+                    <div class="flex items-center gap-4 min-w-0 z-10">
+                        <!-- Avatar -->
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-100 to-violet-50 text-violet-600 group-hover:from-violet-500 group-hover:to-indigo-600 group-hover:text-white flex items-center justify-center font-black text-sm transition-all duration-300 shadow-sm flex-shrink-0">
                             {{ student.full_name|slice:":1" }}
                         </div>
+                        
+                        <!-- Name and Group -->
                         <div class="min-w-0">
-                            <p class="text-sm font-bold text-mainText truncate">{{ student.full_name }}</p>
-                            <div class="flex items-center gap-1.5">
-                                <p class="text-[10px] font-bold text-mutedText">{{ student.group.name|default:"Без групи" }}</p>
+                            <p class="text-[15px] font-bold text-slate-800 leading-tight mb-0.5 truncate group-hover:text-violet-900 transition-colors">{{ student.full_name }}</p>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">{{ student.group.name|default:"Без групи" }}</span>
                                 {% if student.rfid_uid %}
-                                <span class="hidden sm:inline text-[9px] font-mono text-emerald-700 bg-emerald-50 px-1 rounded border border-emerald-200">{{ student.rfid_uid }}</span>
+                                <span class="hidden sm:inline-flex items-center gap-1 text-[9px] font-mono font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                                    <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
+                                    {{ student.rfid_uid }}
+                                </span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                    <div class="flex-shrink-0 z-10 flex items-center gap-1.5">
+
+                    <!-- Status -->
+                    <div class="flex-shrink-0 z-10">
                         {% if student.rfid_uid %}
-                        <div class="w-6 h-6 rounded-lg bg-emerald-500 text-white flex items-center justify-center shadow-sm shadow-emerald-500/20" title="Картка прив'язана">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500 transition-all duration-300 shadow-sm" title="Картка прив'язана">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </div>
                         {% else %}
-                        <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200" title="Без картки">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100 group-hover:border-violet-200 group-hover:text-violet-400 transition-all duration-300" title="Без картки">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </div>
                         {% endif %}
-                        <div class="sel-indicator hidden w-1 h-5 rounded-full bg-violet-500 absolute right-0 top-1/2 -translate-y-1/2"></div>
                     </div>
+
+                    <!-- Active indicator line -->
+                    <div class="active-indicator absolute left-0 top-0 bottom-0 w-1 bg-violet-500 opacity-0 transition-opacity duration-200"></div>
                 </div>
                 {% empty %}
-                <p class="text-xs text-mutedText text-center py-10">Нікого не знайдено</p>
+                <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+                    <div class="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center text-slate-300 mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <p class="text-sm font-bold text-slate-500">Нікого не знайдено</p>
+                    <p class="text-xs text-slate-400 mt-1">Спробуйте змінити параметри пошуку</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -328,6 +347,34 @@
     color: #ffffff !important;
     box-shadow: 0 4px 14px rgba(5,150,105,.32) !important;
     cursor: default !important;
+}
+
+/* New Student List Styles */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+.student-row {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.student-row.active-student {
+    border-color: #a78bfa !important;
+    background-color: #f5f3ff !important;
+    box-shadow: 0 8px 20px -4px rgba(139, 92, 246, 0.15);
+    transform: translateX(4px);
+}
+.student-row.active-student .active-indicator {
+    opacity: 1 !important;
 }
 </style>
 <script>
@@ -445,8 +492,11 @@ function setFilter(f) {
     _activeFilter = f;
     ['all','none','has'].forEach(id => {
         const btn = document.getElementById('filter-'+id);
-        btn.className = "flex-1 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all whitespace-nowrap " +
-            (id === f ? "bg-white shadow-sm text-violet-600" : "text-mutedText hover:text-mainText");
+        if (id === f) {
+            btn.className = "px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all bg-white shadow-sm text-violet-600 whitespace-nowrap";
+        } else {
+            btn.className = "px-4 py-2 text-[11px] font-black uppercase tracking-wider rounded-xl transition-all text-slate-500 hover:text-slate-700 whitespace-nowrap";
+        }
     });
     filterStudents();
 }
@@ -468,12 +518,10 @@ function filterStudents() {
 /* ── Student selection ───────────────────────────────────── */
 function selectStudent(row) {
     document.querySelectorAll('.student-row').forEach(r => {
-        r.classList.remove('border-violet-400','bg-violet-50/50','ring-2','ring-violet-300/40');
-        r.querySelector('.sel-indicator')?.classList.add('hidden');
+        r.classList.remove('active-student');
     });
 
-    row.classList.add('border-violet-400','bg-violet-50/50','ring-2','ring-violet-300/40');
-    row.querySelector('.sel-indicator')?.classList.remove('hidden');
+    row.classList.add('active-student');
 
     _studentId = row.dataset.id;
     _studentHasCard = !!row.dataset.uid;
@@ -513,8 +561,7 @@ function selectStudent(row) {
 function hideActionBar() {
     document.getElementById('action-bar-container').classList.add('hidden');
     document.querySelectorAll('.student-row').forEach(r => {
-        r.classList.remove('border-violet-400','bg-violet-50/50','ring-2','ring-violet-300/40');
-        r.querySelector('.sel-indicator')?.classList.add('hidden');
+        r.classList.remove('active-student');
     });
     _studentId = null;
 }

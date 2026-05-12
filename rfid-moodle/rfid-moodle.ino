@@ -22,7 +22,7 @@ struct WifiNetwork {
 WifiNetwork networks[] = {
   {"UKrtelecom_433750", "SS3q9tbC"},
   {"Boscolviv", "Boscolviv"},
-  {"SSID_3", "PASS_3"}
+  {"TP-Link_C4BE", "49909210"}
 };
 const int networkCount = sizeof(networks) / sizeof(networks[0]);
 
